@@ -397,9 +397,10 @@
                 <!-- 선택지가 여기에 동적으로 생성됩니다 -->
             </div>
             
-            <div class="button-group">
+           <div class="button-group">
     <button class="nav-btn" id="prev-btn" onclick="previousQuestion()" disabled>이전 문제</button>
     <button class="nav-btn" id="next-btn" onclick="nextQuestion()" style="display: none;">다음 문제</button>
+    <button class="nav-btn" id="continue-btn" onclick="continueToNext()" style="display: none;">다음 문제로</button>
     <button class="reset-btn" onclick="resetQuiz()">처음부터</button>
 </div>
 
@@ -1017,27 +1018,31 @@
             document.getElementById('question-text').innerHTML = question.text;
             document.getElementById('current-question').textContent = currentQuestionIndex + 1;
             
-            // 선택지를 랜덤하게 섞기
-            const shuffledOptions = [...question.options];
-            const correctAnswer = shuffledOptions[question.correct];
-            
-            // Fisher-Yates 셔플 알고리즘
-            for (let i = shuffledOptions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        // 선택지를 랜덤하게 섞기 (문제마다 한 번만)
+            if (!question.shuffled) {
+                const originalOptions = [...question.options];
+                const correctAnswer = originalOptions[question.correct];
+                
+                // Fisher-Yates 셔플 알고리즘
+                for (let i = originalOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [originalOptions[i], originalOptions[j]] = [originalOptions[j], originalOptions[i]];
+                }
+                
+                // 새로운 정답 인덱스 찾기
+                const newCorrectIndex = originalOptions.indexOf(correctAnswer);
+                
+                // 문제 객체 업데이트
+                question.options = originalOptions;
+                question.correct = newCorrectIndex;
+                question.shuffled = true;
             }
-            
-            // 새로운 정답 인덱스 찾기
-            const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
-            
-            // 현재 문제의 정답 인덱스 업데이트
-            selectedQuestions[currentQuestionIndex].correct = newCorrectIndex;
             
             // 선택지 생성
             const optionsContainer = document.getElementById('options');
             optionsContainer.innerHTML = '';
             
-            shuffledOptions.forEach((option, index) => {
+            question.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.className = 'option';
                 optionElement.innerHTML = `<span class="option-label">${index + 1}.</span>${option}`;
@@ -1051,6 +1056,7 @@
             document.getElementById('check-btn').disabled = true;
             document.getElementById('feedback').style.display = 'none';
             document.getElementById('countdown').style.display = 'none';
+            document.getElementById('continue-btn').style.display = 'none';
             
             // 이전/다음 버튼 상태 업데이트
             document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
@@ -1063,43 +1069,48 @@
     checkAnswer();
 }
 
-        function checkAnswer() {
-    if (selectedOption === -1 || isAnswered) return;
-    
-    const question = selectedQuestions[currentQuestionIndex];
-    const options = document.querySelectorAll('.option');
-    const feedback = document.getElementById('feedback');
-    
-    isAnswered = true;
-    
-    // 선택한 옵션 강조
-    options[selectedOption].classList.add('selected');
-    
-    // 모든 선택지 비활성화
-    options.forEach(opt => opt.classList.add('disabled'));
-    
-    // 정답 표시
-    options[question.correct].classList.add('correct');
-    
-    if (selectedOption === question.correct) {
-        feedback.textContent = '✅ 정답입니다!';
-        feedback.className = 'feedback correct';
-        if (!answeredQuestions[currentQuestionIndex]) {
-            score++;
-            answeredQuestions[currentQuestionIndex] = true;
-            document.getElementById('current-score').textContent = score;
+ function checkAnswer() {
+            if (selectedOption === -1 || isAnswered) return;
+            
+            const question = selectedQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            isAnswered = true;
+            
+            // 선택한 옵션 강조
+            options[selectedOption].classList.add('selected');
+            
+            // 모든 선택지 비활성화
+            options.forEach(opt => opt.classList.add('disabled'));
+            
+            // 정답 표시
+            options[question.correct].classList.add('correct');
+            
+            if (selectedOption === question.correct) {
+                feedback.textContent = '✅ 정답입니다!';
+                feedback.className = 'feedback correct';
+                if (!answeredQuestions[currentQuestionIndex]) {
+                    score++;
+                    answeredQuestions[currentQuestionIndex] = true;
+                    document.getElementById('current-score').textContent = score;
+                }
+                feedback.style.display = 'block';
+                
+                // 정답인 경우 카운트다운 시작
+                startCountdown();
+            } else {
+                options[selectedOption].classList.add('incorrect');
+                feedback.textContent = `❌ 틀렸습니다. 정답: ${question.options[question.correct]}`;
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                
+                // 오답인 경우 다음 문제 버튼 표시
+                document.getElementById('continue-btn').style.display = 'inline-block';
+            }
         }
-    } else {
-        options[selectedOption].classList.add('incorrect');
-        feedback.textContent = `❌ 틀렸습니다. 정답: ${question.options[question.correct]}`;
-        feedback.className = 'feedback incorrect';
-    }
-    
-    feedback.style.display = 'block';
-    
-    // 카운트다운 시작
-    startCountdown();
-       function startCountdown() {
+
+        function startCountdown() {
             const countdownElement = document.getElementById('countdown');
             let count = 3;
             
@@ -1123,8 +1134,18 @@
                     }
                 }
             }, 1000);
-        }     
-}
+        }
+
+        function continueToNext() {
+            document.getElementById('continue-btn').style.display = 'none';
+            
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
         function nextQuestion() {
             if (currentQuestionIndex < selectedQuestions.length - 1) {
                 currentQuestionIndex++;
