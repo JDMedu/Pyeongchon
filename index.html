@@ -945,53 +945,57 @@
             document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
         }
 
-        function selectOption(index) {
-            if (isAnswered) return;
-            
-            // 이전 선택 해제
-            document.querySelectorAll('.option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            // 새로운 선택
-            document.querySelectorAll('.option')[index].classList.add('selected');
-            selectedOption = index;
-            document.getElementById('check-btn').disabled = false;
-        }
+       function selectOption(index) {
+    if (isAnswered) return;
+    
+    selectedOption = index;
+    checkAnswer();
+}
 
         function checkAnswer() {
-            if (selectedOption === -1 || isAnswered) return;
-            
-            const question = selectedQuestions[currentQuestionIndex];
-            const options = document.querySelectorAll('.option');
-            const feedback = document.getElementById('feedback');
-            
-            isAnswered = true;
-            
-            // 모든 선택지 비활성화
-            options.forEach(opt => opt.classList.add('disabled'));
-            
-            // 정답 표시
-            options[question.correct].classList.add('correct');
-            
-            if (selectedOption === question.correct) {
-                feedback.textContent = '✅ 정답입니다!';
-                feedback.className = 'feedback correct';
-                if (!answeredQuestions[currentQuestionIndex]) {
-                    score++;
-                    answeredQuestions[currentQuestionIndex] = true;
-                    document.getElementById('current-score').textContent = score;
-                }
-            } else {
-                options[selectedOption].classList.add('incorrect');
-                feedback.textContent = `❌ 틀렸습니다. 정답: ${question.options[question.correct]}`;
-                feedback.className = 'feedback incorrect';
-            }
-            
-            feedback.style.display = 'block';
-            document.getElementById('check-btn').disabled = true;
+    if (selectedOption === -1 || isAnswered) return;
+    
+    const question = selectedQuestions[currentQuestionIndex];
+    const options = document.querySelectorAll('.option');
+    const feedback = document.getElementById('feedback');
+    
+    isAnswered = true;
+    
+    // 선택한 옵션 강조
+    options[selectedOption].classList.add('selected');
+    
+    // 모든 선택지 비활성화
+    options.forEach(opt => opt.classList.add('disabled'));
+    
+    // 정답 표시
+    options[question.correct].classList.add('correct');
+    
+    if (selectedOption === question.correct) {
+        feedback.textContent = '✅ 정답입니다!';
+        feedback.className = 'feedback correct';
+        if (!answeredQuestions[currentQuestionIndex]) {
+            score++;
+            answeredQuestions[currentQuestionIndex] = true;
+            document.getElementById('current-score').textContent = score;
         }
-
+    } else {
+        options[selectedOption].classList.add('incorrect');
+        feedback.textContent = `❌ 틀렸습니다. 정답: ${question.options[question.correct]}`;
+        feedback.className = 'feedback incorrect';
+    }
+    
+    feedback.style.display = 'block';
+    
+    // 2초 후 자동으로 다음 문제로 이동
+    setTimeout(() => {
+        if (currentQuestionIndex < selectedQuestions.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            showFinalScore();
+        }
+    }, 2000);
+}
         function nextQuestion() {
             if (currentQuestionIndex < selectedQuestions.length - 1) {
                 currentQuestionIndex++;
