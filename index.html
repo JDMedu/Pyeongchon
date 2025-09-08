@@ -1017,11 +1017,27 @@
             document.getElementById('question-text').innerHTML = question.text;
             document.getElementById('current-question').textContent = currentQuestionIndex + 1;
             
+            // 선택지를 랜덤하게 섞기
+            const shuffledOptions = [...question.options];
+            const correctAnswer = shuffledOptions[question.correct];
+            
+            // Fisher-Yates 셔플 알고리즘
+            for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+            }
+            
+            // 새로운 정답 인덱스 찾기
+            const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
+            
+            // 현재 문제의 정답 인덱스 업데이트
+            selectedQuestions[currentQuestionIndex].correct = newCorrectIndex;
+            
             // 선택지 생성
             const optionsContainer = document.getElementById('options');
             optionsContainer.innerHTML = '';
             
-            question.options.forEach((option, index) => {
+            shuffledOptions.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.className = 'option';
                 optionElement.innerHTML = `<span class="option-label">${index + 1}.</span>${option}`;
