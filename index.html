@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국 문학 문제풀이</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .progress-text {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .score {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .question-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #28a745;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 100px;
+            height: 32px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 1em;
+            margin: 0 3px;
+            vertical-align: middle;
+            background: white;
+        }
+
+        .blank:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .check-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .check-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .final-score {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .final-score h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .final-score .score-detail {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .button-group {
+                justify-content: center;
+            }
+            
+            button {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .question-text {
+                font-size: 1em;
+            }
+            
+            .blank {
+                min-width: 80px;
+                height: 30px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 한국 문학 문제풀이</h1>
+            <p>빈칸을 채워 문제를 해결해보세요!</p>
+        </div>
+
+        <div class="progress">
+            <span class="progress-text">문제 <span id="current-question">1</span> / <span id="total-questions">0</span></span>
+            <span class="score">점수: <span id="current-score">0</span>점</span>
+        </div>
+
+        <div class="question-section">
+            <div class="question-text" id="question-text">
+                문제를 로딩 중입니다...
+            </div>
+            
+            <div class="button-group">
+                <button class="check-btn" onclick="checkAnswer()">정답 확인</button>
+                <button class="nav-btn" id="prev-btn" onclick="previousQuestion()" disabled>이전 문제</button>
+                <button class="nav-btn" id="next-btn" onclick="nextQuestion()">다음 문제</button>
+                <button class="reset-btn" onclick="resetQuiz()">처음부터</button>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="final-score" id="final-score">
+            <h2>🎉 문제풀이 완료!</h2>
+            <div class="score-detail">
+                총 <span id="final-total">0</span>문제 중 <span id="final-correct">0</span>문제 정답
+            </div>
+            <div class="percentage" id="final-percentage">0%</div>
+            <button class="nav-btn" onclick="resetQuiz()" style="margin-top: 20px;">다시 도전하기</button>
+        </div>
+    </div>
+
+    <script>
+        const questionSets = [
+            // 현대문학 개관
+            [
+                {
+                    text: "한국 문학은 <input type='text' class='blank' data-answer='개화기'>를 분기점으로 하여 현대 문학과 고전 문학으로 나누어진다.",
+                    section: "현대문학 개관"
+                },
+                {
+                    text: "한국 현대 문학은 불행히도 일제 <input type='text' class='blank' data-answer='강점'>아래서 형성되어 전개되었다.",
+                    section: "현대문학 개관"
+                },
+                {
+                    text: "1945년 이후의 문학은 6․25 전쟁과 남북 <input type='text' class='blank' data-answer='분단'>이 빚어낸 비극적 현실을 담은 동시에 통일을 지향한 문학이다.",
+                    section: "현대문학 개관"
+                },
+                {
+                    text: "광복 이후 우리 국민은 남북 분단, 전쟁, 가난, 혁명, 근대화, <input type='text' class='blank' data-answer='독재정치'>, 민주화 운동 등을 겪었다.",
+                    section: "현대문학 개관"
+                }
+            ],
+
+            // 개화기 문학
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='개화기'>에는 고전 시가 양식과 근대시 양식이 공존했다.",
+                    section: "개화기 문학"
+                },
+                {
+                    text: "한국 근대 최초의 신문인 '독립 신문'에는 충군, 애국, 진보 사상, 대동단결 등을 노래한 <input type='text' class='blank' data-answer='창가'>가 십여 편 실렸다.",
+                    section: "개화기 문학"
+                },
+                {
+                    text: "창가의 뒤를 이어 새로운 시가 양식인 <input type='text' class='blank' data-answer='신체시'>가 나타났다.",
+                    section: "개화기 문학"
+                },
+                {
+                    text: "최남선의 '<input type='text' class='blank' data-answer='해에게서 소년에게'>'가 신체시의 대표적인 작품이다.",
+                    section: "개화기 문학"
+                }
+            ],
+
+            // 1920년대 문학
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='1919년'> 3․1운동 이후 여러 신문과 문예지가 발간됨에 따라 한국 현대 시문학은 크게 달라진 모습을 보이게 되었다.",
+                    section: "1920년대 문학"
+                },
+                {
+                    text: "1920년대 초에는 <input type='text' class='blank' data-answer='백조'>, 페허와 같은 동인지를 무대로 하여 허무, 병, 꿈, 눈물 등의 어두운 이미지를 담은 시를 써내었다.",
+                    section: "1920년대 문학"
+                },
+                {
+                    text: "이상화는 '빼앗긴 들에도 봄은 오는가'에서 나라 잃은 슬픔을 적극적인 <input type='text' class='blank' data-answer='저항'> 정신으로 바꾸어 놓았다.",
+                    section: "1920년대 문학"
+                },
+                {
+                    text: "1920년대 중반에는 <input type='text' class='blank' data-answer='경향시'>가 등장한다.",
+                    section: "1920년대 문학"
+                }
+            ],
+
+            // 1920년대 대표 시인
+            [
+                {
+                    text: "한용운은 시집 '<input type='text' class='blank' data-answer='님의 침묵'>'에서, 임을 상실한 슬픔을 기다림의 의지로 승화시켜 독특한 사상시의 세계를 개척하였다.",
+                    section: "1920년대 대표 시인"
+                },
+                {
+                    text: "김소월은 시집 '<input type='text' class='blank' data-answer='진달래꽃'>'에서 민요적 율격에 우리 민족 고유의 서정을 잘 담아 내어 서정시의 기틀을 다져 놓았다.",
+                    section: "1920년대 대표 시인"
+                },
+                {
+                    text: "최남선, 이은상, 이병기 등은 <input type='text' class='blank' data-answer='시조'> 부흥 운동을 일으켜 우리 민족 고유의 언어와 사상을 지키고자 했다.",
+                    section: "1920년대 대표 시인"
+                },
+                {
+                    text: "김동환은 서사시집 '<input type='text' class='blank' data-answer='국경의 밤'>'을 발표했다.",
+                    section: "1920년대 대표 시인"
+                }
+            ],
+
+            // 1930년대 순수시
+            [
+                {
+                    text: "1930년대에 '<input type='text' class='blank' data-answer='시문학'>'이라는 잡지를 무대로 하여 박용철, 김영랑은 순수시를 내세웠다.",
+                    section: "1930년대 순수시"
+                },
+                {
+                    text: "김영랑의 '<input type='text' class='blank' data-answer='모란이 피기까지는'>'은 대표적인 순수시로, 1920년대 시가 보여 준 감상성과 이념성을 거부하고 순수 서정의 세계를 열어 보였다.",
+                    section: "1930년대 순수시"
+                },
+                {
+                    text: "1930년대 시는 곧 <input type='text' class='blank' data-answer='모더니즘'> 시라고 할 정도로 많은 작품들이 발표되었다.",
+                    section: "1930년대 순수시"
+                },
+                {
+                    text: "김광균은 시집 '<input type='text' class='blank' data-answer='와사등'>'에서 대상을 주로 시각적 이미지와 감각으로 표현하는 이미지즘의 경향을 보여 주었다.",
+                    section: "1930년대 순수시"
+                }
+            ],
+
+            // 1930년대 모더니즘
+            [
+                {
+                    text: "이상은 '<input type='text' class='blank' data-answer='오감도'>' 연작시에서처럼 내면 세계를 초현실주의 기법을 사용하여 파헤치는 시를 썼다.",
+                    section: "1930년대 모더니즘"
+                },
+                {
+                    text: "정지용은 서구 시의 시각과 표현 방식을 수용하는 데서 출발하였으나, 나중에 가서는 <input type='text' class='blank' data-answer='카톨릭주의'>, 동양적 세계, 자연시 쪽으로 접어든다.",
+                    section: "1930년대 모더니즘"
+                },
+                {
+                    text: "1930년대 후반, 흔히 '<input type='text' class='blank' data-answer='생명파'>'로 불리는 서정주와 유치환은 주로 인간과 생명의 탐구에 주력했다.",
+                    section: "1930년대 모더니즘"
+                },
+                {
+                    text: "서정주는 '<input type='text' class='blank' data-answer='화사'>'와 '자화상' 등의 시에서 생명이란 무엇인가라는 물음을 던지면서 주로 본능과 무의식을 탐구했다.",
+                    section: "1930년대 모더니즘"
+                }
+            ],
+
+            // 저항문학
+            [
+                {
+                    text: "유치환은 '<input type='text' class='blank' data-answer='깃발'>'과 '생명의 서' 등과 같은 시에서 인간의 의지와 사유의 문제에 관심을 집중시켰다.",
+                    section: "저항문학"
+                },
+                {
+                    text: "윤동주는 '<input type='text' class='blank' data-answer='서시'>', '쉽게 씌어진 시' 등과 같은 작품을 통해 부끄러움을 강조하면서 식민지 지식인으로서의 자기 성찰을 보여 주었다.",
+                    section: "저항문학"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='광야'>', '절정' 등의 시를 통해 조국 독립에의 강한 의지를 드러낸 이육사는 이상화, 윤동주와 함께 저항시의 범주를 형성하였다.",
+                    section: "저항문학"
+                },
+                {
+                    text: "광복 직후에는 박목월, 박두진, 조지훈의 합동 시집 '<input type='text' class='blank' data-answer='청록집'>'이 간행되었다.",
+                    section: "저항문학"
+                }
+            ],
+
+            // 전후문학
+            [
+                {
+                    text: "6․25 전쟁은 시인과 시에 엄청난 영향을 주었는데, 이 무렵에는 <input type='text' class='blank' data-answer='전쟁시'>와 애국시가 주류를 이루었다.",
+                    section: "전후문학"
+                },
+                {
+                    text: "조지훈의 시집 '<input type='text' class='blank' data-answer='역사 앞에서'>', 유치환의 '보병과 더불어'는 종군 체험이 낳은 대표적인 시집이다.",
+                    section: "전후문학"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='후반기'>' 동인이 결성되면서 박인환, 김수영, 전봉건 등을 중심으로 하여 모더니즘이 전개되었다.",
+                    section: "전후문학"
+                },
+                {
+                    text: "박인환의 '<input type='text' class='blank' data-answer='목마와 숙녀'>'는 전후의 허무감을 잘 드러내었다.",
+                    section: "전후문학"
+                }
+            ],
+
+            // 1960-70년대 시
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='1960년대'>는 부조리한 현실을 비판하고 고발하는 현실 참여시가 많이 창작되었다.",
+                    section: "1960-70년대 시"
+                },
+                {
+                    text: "1970년대에 들어 현실 참여시는 더욱 암담해진 정치 상황에 더 적극적으로 저항하면서 '<input type='text' class='blank' data-answer='민중시'>' 라는 이름으로 바뀌었다.",
+                    section: "1960-70년대 시"
+                },
+                {
+                    text: "개화기 소설은 고전 소설과 현대 소설의 <input type='text' class='blank' data-answer='징검다리'> 역할을 하였다.",
+                    section: "1960-70년대 시"
+                },
+                {
+                    text: "이인직의 '<input type='text' class='blank' data-answer='혈의 누'>', 이해조의 '자유종' 등의 신소설은 개화 사상, 교육 입국 등을 적극적으로 수용할 것을 권장했다.",
+                    section: "1960-70년대 시"
+                }
+            ],
+
+            // 1920년대 소설
+            [
+                {
+                    text: "개화기 소설과 리얼리즘을 기반으로 한 1920년대 소설 사이에 이광수의 '<input type='text' class='blank' data-answer='무정'>'이 있다.",
+                    section: "1920년대 소설"
+                },
+                {
+                    text: "<input type='text' class='blank' data-answer='1920년대'>에는 가난을 소재로 한 소설들이 많이 창작되었다.",
+                    section: "1920년대 소설"
+                },
+                {
+                    text: "현진건의 '<input type='text' class='blank' data-answer='운수 좋은 날'>'은 일제 강점 아래서의 한국인의 비참한 삶을 그렸다.",
+                    section: "1920년대 소설"
+                },
+                {
+                    text: "1920년대 중반, 조명희, 최학송 등이 중심이 된 <input type='text' class='blank' data-answer='경향'> 소설이 등장하였다.",
+                    section: "1920년대 소설"
+                }
+            ],
+
+            // 1930년대 소설
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='1930년대'> 소설은 리얼리즘 경향과 모더니즘 경향이 비슷한 힘으로 양분된다.",
+                    section: "1930년대 소설"
+                },
+                {
+                    text: "이상의 '<input type='text' class='blank' data-answer='날개'>'는 인간 내면의 분열을 그리는데 치중한 모더니즘 소설이다.",
+                    section: "1930년대 소설"
+                },
+                {
+                    text: "염상섭의 '<input type='text' class='blank' data-answer='삼대'>'는 우리 민족의 역사가 압축되어 나타나는 가족사 소설이다.",
+                    section: "1930년대 소설"
+                },
+                {
+                    text: "심훈의 '<input type='text' class='blank' data-answer='상록수'>'는 일제 강점기 한국 농촌의 비참한 현실을 그리면서 적극적인 현실 타개책까지 제시한다.",
+                    section: "1930년대 소설"
+                }
+            ],
+
+            // 고전시가 개관
+            [
+                {
+                    text: "고전시가는 시대에 따라 갈래의 명칭이 다르다. 대표적으로 <input type='text' class='blank' data-answer='고대가요'>, 향가, 고려가요, 시조, 가사 등이 있다.",
+                    section: "고전시가 개관"
+                },
+                {
+                    text: "고대 부족 국가 시대, 삼국시대에 고대가요, <input type='text' class='blank' data-answer='신라'> 시대에 향가가 주로 향유되었다.",
+                    section: "고전시가 개관"
+                },
+                {
+                    text: "<input type='text' class='blank' data-answer='고려'> 시대에 고려가요, 조선 시대에 시조와 가사가 주로 향유되었다.",
+                    section: "고전시가 개관"
+                },
+                {
+                    text: "<input type='text' class='blank' data-answer='조선'> 시대에 시조와 가사가 주로 향유되었다.",
+                    section: "고전시가 개관"
+                }
+            ],
+
+            // 고대가요
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='고대가요'>는 상고 시대의 집단적, 서사적인 원시 종합 예술 형태에서 개인적, 서정적인 시가로 분리, 발전하는 과정에서 발생한 시가 형태를 통칭한다.",
+                    section: "고대가요"
+                },
+                {
+                    text: "고대가요는 대부분 배경 <input type='text' class='blank' data-answer='설화'>를 지니고 있으며 기록 수단이 없어 구전되다가 후에 한자가 수용되면서 한역되었다.",
+                    section: "고대가요"
+                },
+                {
+                    text: "물에 빠져 죽은 남편의 죽음을 애도하며 부른 '<input type='text' class='blank' data-answer='공무도하가'>'가 고대가요의 대표작이다.",
+                    section: "고대가요"
+                },
+                {
+                    text: "새로운 생명의 강림을 기원한 '<input type='text' class='blank' data-answer='구지가'>', 멀리 행상 나간 남편의 안전을 기원하는 '<input type='text' class='blank' data-answer='정읍사'>' 등이 전해진다.",
+                    section: "고대가요"
+                }
+            ],
+
+            // 향가
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='향가'>는 우리 문학사상 최초의 정형화된 서정시로서 한자의 음과 훈을 섞어 쓴 향찰로 표기하였다.",
+                    section: "향가"
+                },
+                {
+                    text: "향가는 형식상 <input type='text' class='blank' data-answer='4구체'>, 8구체, 10구체로 나누어지는데 가장 정제된 형식은 10구체이다.",
+                    section: "향가"
+                },
+                {
+                    text: "선화공주를 아내로 맞고자 아이들에게 퍼뜨린 동요인 '<input type='text' class='blank' data-answer='서동요'>'는 4구체 향가이다.",
+                    section: "향가"
+                },
+                {
+                    text: "죽은 누이의 명복을 빌기 위해 부른 '<input type='text' class='blank' data-answer='제망매가'>'는 10구체에 해당한다.",
+                    section: "향가"
+                }
+            ],
+
+            // 고려가요
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='고려가요'>는 고려 시대 귀족층에서 향유한 경기체가를 제외한 평민들의 민요적 시가 전반을 가리킨다.",
+                    section: "고려가요"
+                },
+                {
+                    text: "고려가요는 대체로 <input type='text' class='blank' data-answer='3-3-2조'>, 3음보 형식으로 몇 개의 연이 연속되는 분연체가 대부분이다.",
+                    section: "고려가요"
+                },
+                {
+                    text: "월별로 자연 경물이나 절기에 따른 남녀의 애정을 읊은 '<input type='text' class='blank' data-answer='동동'>'이 고려가요의 대표작이다.",
+                    section: "고려가요"
+                },
+                {
+                    text: "사랑하는 임과 이별하는 여인의 정한을 노래한 '<input type='text' class='blank' data-answer='가시리'>'가 대표적인 고려가요이다.",
+                    section: "고려가요"
+                }
+            ],
+
+            // 시조
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='시조'>는 고려 후기부터 발달하여 온 우리나라 고유의 정형시로서 신흥 사대부들이 유교적 관념과 주관적 정서를 표현하기 위해 창안하였다.",
+                    section: "시조"
+                },
+                {
+                    text: "시조는 일반적으로 <input type='text' class='blank' data-answer='3장'> 6구 45자 내외를 기본형으로 한다.",
+                    section: "시조"
+                },
+                {
+                    text: "시조의 음보율은 <input type='text' class='blank' data-answer='4음보'>, 음수율은 3-4조, 4-4조가 기본이다.",
+                    section: "시조"
+                },
+                {
+                    text: "평시조의 정형성이 파괴되면서 길게 늘어진 <input type='text' class='blank' data-answer='사설시조'>가 등장하였다.",
+                    section: "시조"
+                }
+            ],
+
+            // 가사
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='가사'>는 고려 후기에 발생하여 조선 전기 사대부 계층에 의해 확고한 문학 양식으로 정착한 문학의 한 갈래이다.",
+                    section: "가사"
+                },
+                {
+                    text: "가사는 <input type='text' class='blank' data-answer='3-4'> 또는 4-4조의 4음보 연속체로 정격가사의 경우 마지막 행은 시조의 종장과 일치한다.",
+                    section: "가사"
+                },
+                {
+                    text: "자연을 예찬하는 강호가사인 '<input type='text' class='blank' data-answer='상춘곡'>'은 정극인의 작품이다.",
+                    section: "가사"
+                },
+                {
+                    text: "사대부들이 일상생활에서 벗어나 기행하고 느낀 감회를 읊은 기행가사 '<input type='text' class='blank' data-answer='관동별곡'>'은 정철의 작품이다.",
+                    section: "가사"
+                }
+            ],
+
+            // 악장과 민요
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='악장'>은 궁중의 여러 의식과 행사, 연회 등에 사용되던 노래로서 조선의 창업과 문물, 제도를 송축하거나 왕의 덕을 기리는 노래를 총칭한다.",
+                    section: "악장과 민요"
+                },
+                {
+                    text: "신체인 '<input type='text' class='blank' data-answer='용비어천가'>', '월인천강지곡', 속요체인 '신도가' 등이 악장의 대표작이다.",
+                    section: "악장과 민요"
+                },
+                {
+                    text: "<input type='text' class='blank' data-answer='민요'>는 민중의 생활 속에서 자연 발생하여 전해오는 노동, 의식, 놀이 등을 할 때 불린 구전 가요이다.",
+                    section: "악장과 민요"
+                },
+                {
+                    text: "민요는 서민들의 정서와 삶을 담고 있으며 '<input type='text' class='blank' data-answer='시집살이 노래'>'가 대표적이다.",
+                    section: "악장과 민요"
+                }
+            ],
+
+            // 고전소설 개관
+            [
+                {
+                    text: "고전소설은 <input type='text' class='blank' data-answer='설화'> 시대에서 출발하여 고려 시대의 가전체 문학, 조선 전기의 전기 소설, 그리고 조선 후기의 다양한 국문 소설로 이어지며 발전하였다.",
+                    section: "고전소설 개관"
+                },
+                {
+                    text: "신화, 전설, 민담을 통틀어 이르는 말인 설화는 집단의 기원, 역사적 인물이나 지형 등에 얽힌 사실, <input type='text' class='blank' data-answer='권선징악'> 등을 전한다.",
+                    section: "고전소설 개관"
+                },
+                {
+                    text: "고려 중기 이후에 성행한 <input type='text' class='blank' data-answer='가전'>은 동식물, 사물 따위를 의인화하여 그 일대기를 전기 형식으로 서술하였다.",
+                    section: "고전소설 개관"
+                },
+                {
+                    text: "우리 소설사는 대체로 <input type='text' class='blank' data-answer='전기소설'>, 영웅소설, 가정소설과 이상소설, 풍자소설, 판소리계소설이 각기 시기적으로 변동을 보이며 나타났다.",
+                    section: "고전소설 개관"
+                }
+            ],
+
+            // 신화와 전설
+            [
+                {
+                    text: "'<input type='text' class='blank' data-answer='주몽'> 신화'는 고구려의 건국 신화로, 영웅이 겪는 시련과 성장을 통해 민족적 정체성을 확립하는 과정을 보여준다.",
+                    section: "신화와 전설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='바리데기'> 신화'는 한국 무속 신화의 대표적인 작품으로, 여성 영웅의 숭고한 희생과 효의 가치를 담고 있다.",
+                    section: "신화와 전설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='장자못'> 전설'은 큰 부자가 인색함 때문에 그의 집이 물벼락을 맞아 연못이 되었다는 이야기이다.",
+                    section: "신화와 전설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='혹부리 영감'>'은 욕심과 어리석음을 풍자하여 지혜와 겸손의 가치를 일깨우는 민담이다.",
+                    section: "신화와 전설"
+                }
+            ],
+
+            // 가전체 문학
+            [
+                {
+                    text: "임춘이 지은 '<input type='text' class='blank' data-answer='공방전'>'은 돈을 의인화해 돈의 폐해와 인간의 탐욕을 풍자한다.",
+                    section: "가전체 문학"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='국순전'>'은 술을 의인화하여 당시의 정치 현실을 풍자하고 술로 인한 패가망신을 경계하였다.",
+                    section: "가전체 문학"
+                },
+                {
+                    text: "이규보가 지은 '<input type='text' class='blank' data-answer='국선생전'>'은 술(누룩)을 의인화하여 당시의 문란한 정치·사회상을 비판하였다.",
+                    section: "가전체 문학"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='청강사자현부전'>'은 거북을 의인화한 작품으로, 왕의 부름에도 응하지 않고 속된 무리와도 어울리지 않는 어진 인물의 행실을 묘사하였다.",
+                    section: "가전체 문학"
+                }
+            ],
+
+            // 전기소설
+            [
+                {
+                    text: "김시습이 지은 '<input type='text' class='blank' data-answer='금오신화'>'는 우리나라 최초의 한문 소설집이다.",
+                    section: "전기소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='이생규장전'>'은 죽은 여인과 사랑을 나누는 전기적인 내용을 통해 시대를 초월한 지고지순한 사랑의 가치를 강조한다.",
+                    section: "전기소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='최척전'>'은 주인공 최척과 옥영의 사랑 이야기를 바탕으로 하면서, 전란으로 인한 가족의 이산과 기적적인 재회를 그린 소설이다.",
+                    section: "전기소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='운영전'>'은 유영이 꿈속에서 안평대군 시절의 궁녀였던 운영 및 그녀의 연인인 김 진사로부터 이야기를 들은 내용이다.",
+                    section: "전기소설"
+                }
+            ],
+
+            // 영웅소설
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='영웅소설'>은 영웅이 등장하여 영웅적인 활약을 보여주는 작품들을 가리킨다.",
+                    section: "영웅소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='홍길동전'>'은 허균이 지은 우리나라 최초의 한글 소설로, 당시 사회 제도의 결함, 특히 적서 차별을 타파하고 부패한 정치를 개혁하려는 의도로 지은 사회 소설이다.",
+                    section: "영웅소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='조웅전'>'은 조선 시대의 대표적 군담 소설로 중국 송나라를 배경으로 한다.",
+                    section: "영웅소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='박씨전'>'은 박색인 박씨부인이 뛰어난 학식과 재주로 남편을 평안 감사가 되게 한 후, 자신도 허물을 벗고 미인이 되어 외적을 물리친다는 줄거리이다.",
+                    section: "영웅소설"
+                }
+            ],
+
+            // 가정소설과 이상소설
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='가정소설'>은 가족구성원 상호 간의 갈등, 가정과 가정의 갈등, 두 남녀의 결연을 가로막는 존재와 두 남녀 사이의 갈등을 다룬 소설들을 말한다.",
+                    section: "가정소설과 이상소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='사씨남정기'>'는 사씨가 교씨의 음모로 인해 시댁에서 쫓겨나 온갖 역경을 겪고 시댁으로 복귀하는 과정을 그린 작품이다.",
+                    section: "가정소설과 이상소설"
+                },
+                {
+                    text: "<input type='text' class='blank' data-answer='이상소설'>은 중세의 이상적인 삶을 형상화한 소설로, '구운몽', '옥루몽' 등을 들 수 있다.",
+                    section: "가정소설과 이상소설"
+                },
+                {
+                    text: "김만중이 쓴 '<input type='text' class='blank' data-answer='구운몽'>'은 인간의 부귀영화가 한낱 꿈에 지나지 않는다는 불교적 인생관을 주제로 하고 있다.",
+                    section: "가정소설과 이상소설"
+                }
+            ],
+
+            // 풍자소설
+            [
+                {
+                    text: "<input type='text' class='blank' data-answer='풍자소설'>은 풍자를 기법으로 풍자정신을 주제로 하여 사건을 전개하는 소설이다.",
+                    section: "풍자소설"
+                },
+                {
+                    text: "박지원의 '<input type='text' class='blank' data-answer='양반전'>'은 가난한 양반이 부자에게 양반 신분을 팔려고 하였으나 양반의 조건이 너무 까다로워 부자가 양반 신분을 사양하였다는 내용이다.",
+                    section: "풍자소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='허생전'>'은 허생의 상행위를 통하여 당시 허약한 국가 경제를 비판하고 양반의 무능과 허위의식을 풍자한 작품이다.",
+                    section: "풍자소설"
+                },
+                {
+                    text: "'<input type='text' class='blank' data-answer='배비장전'>'은 판소리 '배비장가'를 소설화한 것으로, 여색에 빠지지 않겠다고 아내와 약속한 배비장이 기생 애랑의 계교에 넘어가 망신을 당한다는 내용이다.",
+                    section: "풍자소설"
+                }
+            ]
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = [];
+        let selectedQuestions = [];
+
+        function initializeQuiz() {
+            // 각 섹션에서 랜덤하게 1문제씩 선택
+            selectedQuestions = [];
+            questionSets.forEach(set => {
+                const randomIndex = Math.floor(Math.random() * set.length);
+                selectedQuestions.push(set[randomIndex]);
+            });
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = new Array(selectedQuestions.length).fill(false);
+            
+            document.getElementById('total-questions').textContent = selectedQuestions.length;
+            document.getElementById('current-score').textContent = score;
+            document.getElementById('final-score').style.display = 'none';
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex >= selectedQuestions.length) {
+                showFinalScore();
+                return;
+            }
+
+            const question = selectedQuestions[currentQuestionIndex];
+            document.getElementById('question-text').innerHTML = question.text;
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            
+            // 이전/다음 버튼 상태 업데이트
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            
+            // 피드백 숨기기
+            document.getElementById('feedback').style.display = 'none';
+            
+            // 입력 필드에 포커스
+            const blank = document.querySelector('.blank');
+            if (blank) {
+                blank.focus();
+                blank.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkAnswer();
+                    }
+                });
+            }
+        }
+
+        function checkAnswer() {
+            const blank = document.querySelector('.blank');
+            const userAnswer = blank.value.trim();
+            const correctAnswers = blank.dataset.answer.split('|');
+            
+            const feedback = document.getElementById('feedback');
+            const isCorrect = correctAnswers.some(answer => 
+                userAnswer === answer || userAnswer === answer.replace(/[․·.]/g, '.')
+            );
+            
+            if (isCorrect) {
+                feedback.textContent = '✅ 정답입니다!';
+                feedback.className = 'feedback correct';
+                if (!answeredQuestions[currentQuestionIndex]) {
+                    score++;
+                    answeredQuestions[currentQuestionIndex] = true;
+                    document.getElementById('current-score').textContent = score;
+                }
+            } else {
+                feedback.textContent = `❌ 틀렸습니다. 정답: ${correctAnswers[0]}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < selectedQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function showFinalScore() {
+            document.querySelector('.question-section').style.display = 'none';
+            
+            const finalScore = document.getElementById('final-score');
+            const percentage = Math.round((score / selectedQuestions.length) * 100);
+            
+            document.getElementById('final-total').textContent = selectedQuestions.length;
+            document.getElementById('final-correct').textContent = score;
+            document.getElementById('final-percentage').textContent = percentage + '%';
+            
+            finalScore.style.display = 'block';
+        }
+
+        function resetQuiz() {
+            document.querySelector('.question-section').style.display = 'block';
+            initializeQuiz();
+        }
+
+        // 페이지 로드 시 퀴즈 초기화
+        window.onload = function() {
+            initializeQuiz();
+        };
+    </script>
+</body>
+</html>
