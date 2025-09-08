@@ -990,6 +990,7 @@
         let selectedQuestions = [];
         let selectedOption = -1;
         let isAnswered = false;
+        let countdownInterval = null;
 
         function initializeQuiz() {
             // 각 섹션에서 랜덤하게 1문제씩 선택
@@ -1113,31 +1114,23 @@
 }
         }
 
-        function startCountdown() {
-            const countdownElement = document.getElementById('countdown');
-            let count = 3;
-            
-            countdownElement.style.display = 'block';
-            countdownElement.textContent = count;
-            
-            const countdownInterval = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    countdownElement.textContent = count;
-                } else {
-                    clearInterval(countdownInterval);
-                    countdownElement.style.display = 'none';
-                    
-                    // 다음 문제로 이동
-                    if (currentQuestionIndex < selectedQuestions.length - 1) {
-                        currentQuestionIndex++;
-                        displayQuestion();
-                    } else {
-                        showFinalScore();
-                    }
-                }
-            }, 1000);
-        }
+       function continueToNext() {
+    // 카운트다운이 실행 중이면 중단
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        document.getElementById('countdown').style.display = 'none';
+    }
+    
+    document.getElementById('continue-btn').style.display = 'none';
+    
+    if (currentQuestionIndex < selectedQuestions.length - 1) {
+        currentQuestionIndex++;
+        displayQuestion();
+    } else {
+        showFinalScore();
+    }
+}
 
         function continueToNext() {
             document.getElementById('continue-btn').style.display = 'none';
